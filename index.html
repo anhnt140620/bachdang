@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Đại Chiến Bạch Đằng 1288</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Play:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            /* SaddleBrown */
+            --water-deep: #1a237e;
+            --water-shallow: #4fc3f7;
+            --accent-gold: #FFD700;
+            --text-light: #f5f5f5;
+            --danger: #d32f2f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Play', sans-serif;
+            background-color: #1a1a1a;
+            background-image:
+                radial-gradient(circle at 50% 50%, #2c3e50 0%, #000000 100%);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Container with "Bamboo Scroll" effect */
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            max-height: 900px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #5d4037;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(to bottom, #3e2723, #5d4037);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 4px solid var(--accent-gold);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: #d7ccc8;
+        }
+
+        /* Stats Bar */
+        .hud-bar {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hud-item {
+            text-align: center;
+        }
+
+        .hud-label {
+            font-size: 0.7rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .hud-value.highlight {
+            color: var(--accent-gold);
+        }
+
+        /* Game Area */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Tide Indicator Overlay */
+        .tide-gauge {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 60%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tide-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--water-deep), var(--water-shallow));
+            transition: height 0.3s ease;
+        }
+
+        .tide-label {
+            position: absolute;
+            right: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.8rem;
+            text-align: right;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Controls */
+        .controls-area {
+            padding: 15px;
+            background: #263238;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Play', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            filter: grayscale(100%);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #1b5e20, #4caf50);
+            color: white;
+            box-shadow: 0 4px 0 #0d3311;
+        }
+
+        .btn-attack {
+            background: linear-gradient(45deg, #b71c1c, #f44336);
+            color: white;
+            box-shadow: 0 4px 0 #7f0000;
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .tutorial-card {
+            background: #3e2723;
+            /* Dark Wood */
+            border: 2px solid var(--accent-gold);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            box-shadow: 0 0 30px var(--accent-gold);
+        }
+
+        .tutorial-card h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
+
+        .tutorial-step {
+            margin: 15px 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+
+        /* Effects */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-pulse {
+            animation: pulse 1s infinite;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 50px rgba(255, 255, 215, 0.5);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .rank-badge {
+            font-size: 4rem;
+            margin: 10px 0;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-wrapper">
+        <div class="header">
+            <h1>ĐẠI CHIẾN BẠCH ĐẰNG</h1>
+            <p>1288 - Hào khí Đông A</p>
+        </div>
+
+        <div class="hud-bar">
+            <div class="hud-item">
+                <div class="hud-label">Thuyền Địch</div>
+                <div class="hud-value" id="hud-enemy">10</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">Thời Gian</div>
+                <div class="hud-value highlight" id="hud-time">60s</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">Cọc Tre</div>
+                <div class="hud-value" id="hud-stakes">0</div>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="game-area">
+            <canvas id="gameCanvas"></canvas>
+            <div class="tide-gauge">
+                <div class="tide-fill" id="tide-visual" style="height: 80%"></div>
+            </div>
+            <div class="tide-label">
+                THỦY<br>TRIỀU<br><strong id="tide-text">CAO</strong>
+            </div>
+
+            <div class="tutorial-overlay" id="start-screen">
+                <div class="tutorial-card">
+                    <h2>CHIẾN THUẬT QUÂN SỰ</h2>
+                    <div class="tutorial-step">
+                        <span class="icon">🌊</span>
+                        <span>Đợi <strong>Thủy Triều Lên</strong> (Nước cao)</span>
+                    </div>
+                    <div class="tutorial-step">
+                        <span class="icon">🎋</span>
+                        <span>Chạm vào sông để <strong>Cắm Cọc Ngầm</strong></span>
+                    </div>
+                    <div class="tutorial-step">
+                        <span class="icon">⚔️</span>
+                        <span>Bấm <strong>KHIÊU CHIẾN</strong> để dụ địch!</span>
+                    </div>
+                    <button class="btn btn-start btn-pulse" onclick="game.start()">VÀO TRẬN</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-area">
+            <button class="btn btn-attack" id="btn-attack" disabled onclick="game.attack()">⚔️ KHIÊU CHIẾN!</button>
+        </div>
+    </div>
+
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2 id="end-title" style="font-family: 'Cinzel'; margin-bottom: 10px;">VICTORY</h2>
+            <span class="rank-badge" id="end-badge">🏆</span>
+            <p id="end-desc">Bạn đã đánh chìm 80% hạm đội địch!</p>
+            <div style="margin: 20px 0; border-top: 1px solid #eee; padding-top: 10px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Điểm số:</span>
+                    <strong id="end-score">1500</strong>
+                </div>
+            </div>
+            <button class="btn btn-start" onclick="location.reload()">CHƠI LẠI</button>
+        </div>
+    </div>
+
+    <script>
+        class Game {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.width = 0;
+                this.height = 0;
+
+                this.state = 'MENU'; // MENU, PLAYING, ATTACK, END
+                this.tide = 80;
+                this.tideDir = 1; // 1 = up, -1 = down
+                this.tideSpeed = 0.3;
+
+                this.stakes = [];
+                this.ships = [];
+                this.particles = [];
+
+                this.timeLeft = 60;
+                this.score = 0;
+                this.lastTime = 0;
+                this.waveOffset = 0;
+
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.canvas.addEventListener('mousedown', (e) => this.input(e));
+                this.canvas.addEventListener('touchstart', (e) => this.input(e)); // Better mobile touch
+
+                this.loop = this.loop.bind(this);
+                requestAnimationFrame(this.loop);
+            }
+
+            resize() {
+                const container = document.getElementById('game-area');
+                this.width = container.clientWidth;
+                this.height = container.clientHeight;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+            }
+
+            initShips() {
+                this.ships = [];
+                const cols = 4;
+                for (let i = 0; i < 12; i++) {
+                    this.ships.push({
+                        x: (this.width / cols) * (i % cols) + (Math.random() * 40 + 20),
+                        y: -100 - (Math.floor(i / cols) * 100) - (Math.random() * 50),
+                        w: 40, h: 60,
+                        hp: 100,
+                        active: true,
+                        type: Math.random() > 0.7 ? 'BIG' : 'SMALL',
+                        bobOffset: Math.random() * Math.PI * 2
+                    });
+                }
+                this.updateHUD();
+            }
+
+            start() {
+                document.getElementById('start-screen').style.display = 'none';
+                this.state = 'PLAYING';
+                this.initShips();
+
+                // Timer
+                this.timerInterval = setInterval(() => {
+                    if (this.state === 'PLAYING') {
+                        this.timeLeft--;
+                        document.getElementById('hud-time').innerText = this.timeLeft + 's';
+                        if (this.timeLeft <= 0) this.gameOver(false);
+                    }
+                }, 1000);
+
+                // Enable attack button
+                const btn = document.getElementById('btn-attack');
+                btn.disabled = false;
+                btn.classList.add('btn-pulse');
+            }
+
+            attack() {
+                if (this.state !== 'PLAYING') return;
+                this.state = 'ATTACK';
+                this.tideSpeed = 2.0; // Tide drops fast
+                this.tideDir = -1;
+                document.getElementById('btn-attack').disabled = true;
+                document.getElementById('btn-attack').classList.remove('btn-pulse');
+                document.getElementById('btn-attack').innerText = "ĐANG TẤN CÔNG...";
+            }
+
+            input(e) {
+                if (this.state !== 'PLAYING') return;
+                e.preventDefault();
+
+                // Get coords
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+
+                // Check if valid placement (water area)
+                // Shore is approx bottom 15%
+                if (y < this.height * 0.85) {
+                    // Must be high tide to hide stakes
+                    if (this.tide > 60) {
+                        this.addStake(x, y);
+                    } else {
+                        this.showFloatText(x, y, "Nước quá thấp!", "#ff9");
+                    }
+                } else {
+                    this.showFloatText(x, y, "Trên bờ!", "#fff");
+                }
+            }
+
+            addStake(x, y) {
+                if (this.stakes.length >= 20) {
+                    this.showFloatText(x, y, "Hết cọc!", "#f55");
+                    return;
+                }
+                this.stakes.push({ x, y, visible: false, hit: false });
+                this.spawnParticles(x, y, 5, '#8B4513'); // Wood chips
+                this.updateHUD();
+            }
+
+            updateHUD() {
+                document.getElementById('hud-stakes').innerText = this.stakes.length;
+                document.getElementById('hud-enemy').innerText = this.ships.filter(s => s.active).length;
+            }
+
+            loop(timestamp) {
+                const dt = timestamp - this.lastTime;
+                this.lastTime = timestamp;
+
+                this.update(dt);
+                this.draw();
+                requestAnimationFrame(this.loop);
+            }
+
+            update(dt) {
+                this.waveOffset += 0.05;
+
+                // Tide Logic
+                if (this.state === 'PLAYING') {
+                    this.tide += this.tideDir * this.tideSpeed;
+                    if (this.tide > 95) this.tideDir = -1;
+                    if (this.tide < 50) this.tideDir = 1;
+                } else if (this.state === 'ATTACK') {
+                    if (this.tide > 20) this.tide -= this.tideSpeed;
+                }
+
+                // Update UI Gauge
+                const tideH = Math.max(0, Math.min(100, this.tide));
+                document.getElementById('tide-visual').style.height = tideH + '%';
+                const tideText = document.getElementById('tide-text');
+                if (tideH > 70) { tideText.innerText = "CAO"; tideText.style.color = "#4fc3f7"; }
+                else if (tideH > 40) { tideText.innerText = "TB"; tideText.style.color = "#fff"; }
+                else { tideText.innerText = "THẤP"; tideText.style.color = "#ff9800"; }
+
+                // Stakes Visibility
+                // Stakes appear when tide < 60%
+                this.stakes.forEach(s => {
+                    const depth = (s.y / this.height) * 100; // simplistic depth
+                    // If tide is lower than a threshold, stakes appear
+                    s.visible = this.tide < 60;
+                });
+
+                // Ships Logic
+                if (this.state === 'ATTACK') {
+                    const activeShips = this.ships.filter(s => s.active);
+                    if (activeShips.length === 0 || activeShips.every(s => s.y > this.height)) {
+                        // End condition
+                        setTimeout(() => this.gameOver(true), 1000);
+                    }
+
+                    this.ships.forEach(ship => {
+                        if (!ship.active) return;
+
+                        ship.y += activeShips.length > 5 ? 1.5 : 2.5; // Move down
+
+                        // Collision Check
+                        if (this.tide < 60) { // Only hit exposed stakes
+                            this.stakes.forEach(stake => {
+                                if (!stake.hit && Math.abs(ship.x - stake.x) < 20 && Math.abs(ship.y - stake.y) < 30) {
+                                    // HIT!
+                                    ship.hp -= 100;
+                                    stake.hit = true;
+                                    this.spawnParticles(ship.x, ship.y, 20, '#ff5722'); // Explosion
+                                    this.shakeScreen();
+                                    if (ship.hp <= 0) {
+                                        ship.active = false;
+                                        this.score += 500;
+                                        this.updateHUD();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Particles
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.05;
+                    p.vy += 0.1; // gravity
+                });
+                this.particles = this.particles.filter(p => p.life > 0);
+            }
+
+            draw() {
+                // Clear
+                this.ctx.fillStyle = '#2c3e50'; // Deep water base
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // 1. Draw Shore (Bottom)
+                const shoreH = this.height * 0.15;
+                this.ctx.fillStyle = '#4e342e';
+                this.ctx.fillRect(0, this.height - shoreH, this.width, shoreH);
+                // Grass
+                this.ctx.fillStyle = '#2e7d32';
+                this.ctx.fillRect(0, this.height - shoreH, this.width, 20);
+
+                // 2. Draw Water (Animated)
+                const waterLevelY = this.height - (this.tide / 100 * this.height) - shoreH / 2;
+                // Clamp water so it doesn't go below screen or above
+                // Use gradient for water
+                const grad = this.ctx.createLinearGradient(0, waterLevelY, 0, this.height);
+                grad.addColorStop(0, '#4fc3f7');
+                grad.addColorStop(1, '#0277bd');
+
+                this.ctx.fillStyle = grad;
+
+                // Draw Sine Wave top
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.height);
+                for (let x = 0; x <= this.width; x += 10) {
+                    const y = waterLevelY + Math.sin(x * 0.02 + this.waveOffset) * 5;
+                    this.ctx.lineTo(x, y);
+                }
+                this.ctx.lineTo(this.width, this.height);
+                this.ctx.lineTo(0, this.height);
+                this.ctx.fill();
+
+                // 3. Draw Stakes (Under or Over water)
+                this.stakes.forEach(s => {
+                    // If visible: Full opaque brown
+                    // If hidden: Semi-transparent shadow
+
+                    if (s.visible) {
+                        this.ctx.fillStyle = '#3e2723';
+                        this.ctx.strokeStyle = '#000';
+                    } else {
+                        this.ctx.fillStyle = 'rgba(62, 39, 35, 0.3)';
+                        this.ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                    }
+
+                    // Draw Bamboo Stake spike
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(s.x - 5, s.y);
+                    this.ctx.lineTo(s.x, s.y - 40); // Tip
+                    this.ctx.lineTo(s.x + 5, s.y);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    // Cross details
+                    if (s.visible) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(s.x - 5, s.y - 10); this.ctx.lineTo(s.x + 5, s.y - 12);
+                        this.ctx.moveTo(s.x - 5, s.y - 25); this.ctx.lineTo(s.x + 5, s.y - 27);
+                        this.ctx.stroke();
+                    }
+                });
+
+                // 4. Draw Ships
+                this.ctx.font = '40px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                this.ctx.shadowBlur = 10;
+
+                this.ships.forEach(s => {
+                    if (!s.active) {
+                        // Sinking effect
+                        return;
+                    }
+
+                    // Bobbing effect
+                    const bobY = Math.sin(this.waveOffset + s.bobOffset) * 5;
+
+                    // Ship Body
+                    this.ctx.save();
+                    this.ctx.translate(s.x, s.y + bobY);
+
+                    // Hull
+                    this.ctx.fillStyle = '#5d4037';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-15, 0);
+                    this.ctx.quadraticCurveTo(0, 20, 15, 0);
+                    this.ctx.fill();
+
+                    // Sail
+                    this.ctx.fillStyle = '#d32f2f'; // Red Enemy Sail
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, 0);
+                    this.ctx.lineTo(0, -30);
+                    this.ctx.lineTo(15, -10);
+                    this.ctx.fill();
+
+                    this.ctx.restore();
+                });
+                this.ctx.shadowBlur = 0;
+
+                // 5. Draw Particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1.0;
+            }
+
+            spawnParticles(x, y, count, color) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: (Math.random() - 0.5) * 5,
+                        vy: (Math.random() - 0.5) * 5,
+                        life: 1.0,
+                        size: Math.random() * 5 + 2,
+                        color: color
+                    });
+                }
+            }
+
+            showFloatText(x, y, text, color) {
+                // Simple visual debug for now, or enhancement
+                // For now just particles
+                this.spawnParticles(x, y, 3, color);
+            }
+
+            shakeScreen() {
+                const canvas = this.canvas;
+                canvas.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+                setTimeout(() => canvas.style.transform = 'none', 100);
+            }
+
+            gameOver(win) {
+                clearInterval(this.timerInterval);
+                const modal = document.getElementById('result-modal');
+                const title = document.getElementById('end-title');
+                const badge = document.getElementById('end-badge');
+                const desc = document.getElementById('end-desc');
+                const score = document.getElementById('end-score');
+
+                modal.style.display = 'flex';
+                score.innerText = this.score;
+
+                if (win) {
+                    title.innerText = "ĐẠI THẮNG!";
+                    title.style.color = "#4caf50";
+                    badge.innerText = "🏆";
+                    desc.innerText = "Quân giặc đã bị tan vỡ hoàn toàn trên sông Bạch Đằng!";
+                } else {
+                    title.innerText = "THẤT BẠI...";
+                    title.style.color = "#f44336";
+                    badge.innerText = "💀";
+                    desc.innerText = "Quân giặc đã vượt qua phòng tuyến. Hãy thử lại!";
+                }
+            }
+        }
+
+        const game = new Game();
+    </script>
+
+</body>
+
+</html>
